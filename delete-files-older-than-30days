@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+TARGET_DIR="${1:-$HOME/Downloads}"
+LOGFILE="${HOME}/cleaner.log"
+TRASH_DIR="${HOME}/.local/share/Trash/files"
+
+if [[ ! -d "$TARGET_DIR" ]]; then
+    echo "Ошибка: Папка $TARGET_DIR не существует!"
+    exit 1
+fi
+
+if [[ "$TARGET_DIR" == "/" ]]; then
+    echo "Ошибка: Запрещено чистить корневую папку!"
+    exit 1
+fi
+
+mkdir -p "$TRASH_DIR"
+
+deleted=0
+kept=0
+
+echo "Поиск файлов старше 30 дней в $TARGET_DIR..."
+
+while IFS= read -r -d '' file; do
+   
+    read -p "Удалить файл? $file (y/n): " choice < /dev/tty
+    
+    case "$choice" in 
+        y|Y )
+            mv "$file" "$TRASH_DIR/" 2>/dev/null || rm "$file"
+            echo "Удален: $file"
+            echo "$(date '+%Y-%m-%d %H:%M:%S') Удален: $file" >> "$LOGFILE"
+            ((deleted++))
+            ;;
+        * )
+            echo "Оставлен: $file"
+            ((kept++))
+            ;;
+    esac
+done < <(find "$TARGET_DIR" -type f -mtime +30 -print0)
+
+echo "=========================="
+echo "Удалено: $deleted файлов"
+echo "Оставлено: $kept файлов"
+echo "Лог сохранен в $LOGFILE"
