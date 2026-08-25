@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-read -p "Путь к папке, которую организуем? " way < /dev/tty
+read -p "Enter the folder path" way < /dev/tty
 
 if [[ -z "$way" ]]; then
     way="$(pwd)"
@@ -20,19 +20,20 @@ documents=0
 archives=0
 scripts=0
 other=0
+script_path=$(realpath "$0")
 
 for file in "$way"/*; do
-    # ЗАЩИТА: пропускаем сам скрипт
-    script_path=$(realpath "$0")
+    [[ -f "$file" ]] || continue
     file_path=$(realpath "$file")
     if [[ "$file_path" == "$script_path" ]]; then
-        echo "⚠️  Пропускаю самого себя: $file"
+        echo "Skip the current folder: $file"
         continue
     fi
 
     if [[ -f "$file" ]]; then
         filename=$(basename "$file")
         extension="${filename##*.}"
+        extension="${extension,,}"
 
         case "$extension" in
             jpg|jpeg|png|gif|bmp|svg)
