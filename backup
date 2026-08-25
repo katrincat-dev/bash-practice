@@ -20,7 +20,7 @@ echo "Создаю архив: $backup_name"
 tar -czf "$HOME/backups/$backup_name" -C "$way" . 2>/dev/null
 
 if [[ $? -eq 0 ]]; then
-    size=$(du -h "$HOME/backups/$backup_name" | cut -f1)   # ← ИСПРАВЛЕНО
+    size=$(du -h "$HOME/backups/$backup_name" | cut -f1)
     echo "Бэкап создан: ~/backups/$backup_name"
     echo "Размер: $size"
 else
@@ -28,6 +28,6 @@ else
     exit 1
 fi
 
-old_files=$(find ~/backups -name "backup_*.tar.gz" -mtime +7 | wc -l)   # ← ИСПРАВЛЕНО
+old_files=$(find ~/backups -name "backup_*.tar.gz" -mtime +7 | wc -l)
 find ~/backups -name "backup_*.tar.gz" -mtime +7 -delete
 echo "Удалено старых бэкапов: $old_files"
