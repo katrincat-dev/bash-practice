@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+
+read -p "Enter the folder path" way < /dev/tty
+
+if [[ -z "$way" ]]; then
+    way="$(pwd)"
+fi
+
+if [[ ! -d "$way" ]]; then
+    echo "Ошибка: папка '$way' не найдена!"
+    exit 1
+fi
+
+echo "Организую: $way"
+
+mkdir -p "$way"/{images,documents,archives,other,scripts}
+
+images=0
+documents=0
+archives=0
+scripts=0
+other=0
+script_path=$(realpath "$0")
+
+for file in "$way"/*; do
+    [[ -f "$file" ]] || continue
+    file_path=$(realpath "$file")
+    if [[ "$file_path" == "$script_path" ]]; then
+        echo "Skip the current folder: $file"
+        continue
+    fi
+
+    if [[ -f "$file" ]]; then
+        filename=$(basename "$file")
+        extension="${filename##*.}"
+        extension="${extension,,}"
+
+        case "$extension" in
+            jpg|jpeg|png|gif|bmp|svg)
+                mv "$file" "$way/images/"
+                ((images++))
+                ;;
+            pdf|doc|docx|txt|md)
+                mv "$file" "$way/documents/"
+                ((documents++))
+                ;;
+            zip|tar|gz|rar)
+                mv "$file" "$way/archives/"
+                ((archives++))
+                ;;
+            sh|py|js|rb|pl)
+                mv "$file" "$way/scripts/"
+                ((scripts++))
+                ;;
+            *)
+                mv "$file" "$way/other/"
+                ((other++))
+                ;;
+        esac
+    fi
+done
+
+echo ""
+echo "Перемещено:"
+echo "images: $images файлов"
+echo "documents: $documents файлов"
+echo "archives: $archives файлов"
+echo "scripts: $scripts файлов"
+echo "other: $other файлов"
